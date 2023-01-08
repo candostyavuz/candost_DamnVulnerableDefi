@@ -18,4 +18,11 @@ In that case DVT balance can be increased without calling the `depositTokens()`,
 
 **My Exploit Pattern:** An exploit can be easily carried out by using the Receiver contract's address as the borrower in the lender pool and executing a flash loan until the balance is drained due to the service fees. A naive approach is to send the flash loan transaction 10 times. A more professional approach involves deploying an Attack.sol contract, which executes the flash loan in a single transaction until the balance is completely drained.
 
-**Takeaway**: For external / public functions, one should always remember that anyone (or everyone) can be and will be executing it on their behalf. In this case, deployer of the receiver contract should have a `tx.origin` check to see if the `flashLoan()` transaction is initialized by a authorized wallet. Also, reverting the flashLoan calls with exceptionaly high service fees might be a good idea.
+**Takeaway:** For external / public functions, one should always remember that anyone (or everyone) can be and will be executing it on their behalf. In this case, deployer of the receiver contract should have a `tx.origin` check to see if the `flashLoan()` transaction is initialized by a authorized wallet. Also, reverting the flashLoan calls with exceptionaly high service fees might be a good idea.
+
+# 3- Truster:
+**Issue:** `TrusterLenderPool` enables making a low level call to any given `target` address with any given calldata. Since it is not a `delegatecall()` the `msg.sender` value will always be the pool contract. By using `flashLoand()` function, an attacker contract can make a low-level call to DVT ERC-20 token contract and set infinite number of allowence for itself.
+
+**My Exploit Pattern:** I have written the attacker contract which sets allowence for itself from the pool contract by sending relevant calldata. Also, another function enables attacker to make a `transferFrom()` call to withdraw stolen funds.
+
+**Takeaway:** Making calls to external contracts are dangerous. Trust no one. Limit your contracts with certain call types to only certain (trusted) addresses.

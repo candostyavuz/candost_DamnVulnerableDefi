@@ -33,6 +33,8 @@ contract TrusterLenderPool is ReentrancyGuard {
         require(balanceBefore >= borrowAmount, "Not enough tokens in pool");
         
         damnValuableToken.transfer(borrower, borrowAmount);
+        // @audit enabling to make any call to any address inside a function that transfer assets? - BAD IDEA!
+        // @audit An attacker can call ERC20 approve() function with msg.sender being the Pool contract.
         target.functionCall(data);
 
         uint256 balanceAfter = damnValuableToken.balanceOf(address(this));
