@@ -3,7 +3,7 @@ After completing each challenge, I will document my findings, takeaways and my m
 
 Solutions can be found in `./test` directory under the relevant challenge directory.
 
-- [Can Dost Yavuz](https://twitter.com/0xDost)
+[Can Dost Yavuz](https://twitter.com/0xDost)
 
 # 1- Unstoppable:
 **Issue:** This is a classic DOS attack pattern that is caused by relying on two irrelevant parameters being equal.
