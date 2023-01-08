@@ -18,6 +18,7 @@ contract FlashLoanReceiver {
     }
 
     // Function called by the pool during flash loan
+    // @audit Anyone can call this by giving this contract's address as the borrower address. Check tx.origin!
     function receiveEther(uint256 fee) public payable {
         require(msg.sender == pool, "Sender must be pool");
 

@@ -18,6 +18,7 @@ contract NaiveReceiverLenderPool is ReentrancyGuard {
         return FIXED_FEE;
     }
 
+    // @audit Anyone can call this by giving any borrower contract address, hence forcing it to pay fees!
     function flashLoan(address borrower, uint256 borrowAmount) external nonReentrant {
 
         uint256 balanceBefore = address(this).balance;

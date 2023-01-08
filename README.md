@@ -1,6 +1,8 @@
 **This repo contains my attempt to complete DamnVulnerableDefi CTF as my journey to become a Solidity Security Researcher & Smart Contract Auditor.**
 After completing each challenge, I will document my findings, takeaways and my mental model to exploit the target asset.
 
+Solutions can be found in `./test` directory under the relevant challenge directory.
+
 # 1- Unstoppable:
 **Issue:** This is a classic DOS attack pattern that is caused by relying on two irrelevant parameters being equal.
 `poolBalance` only increases when depositTokens() called, whereas actual token balance of the contract can be increased by a simple ERC20 transfer.
@@ -10,3 +12,10 @@ After completing each challenge, I will document my findings, takeaways and my m
 **Takeaway**: Contracts don't have to necessarily work exactly as developer intended. Never forget that anyone can send any asset to any address.
 In that case DVT balance can be increased without calling the `depositTokens()`, causes mismatch between `poolBalance` and the actual balance.
 *In the case of ETH, generally it's good to avoid relying on `address(this).balance` since it can always be manipulated by `self.destruct()`.*
+
+# 2- Naive Receiver:
+**Issue:** Lack of access control in FlashLoanReceiver contract makes it possible anyone to use this contract's address as the borrower in lender pool, hence forcing it to pay service fees.
+
+**My Exploit Pattern:** An exploit can be easily carried out by using the Receiver contract's address as the borrower in the lender pool and executing a flash loan until the balance is drained due to the service fees. A naive approach is to send the flash loan transaction 10 times. A more professional approach involves deploying an Attack.sol contract, which executes the flash loan in a single transaction until the balance is completely drained.
+
+**Takeaway**: For external / public functions, one should always remember that anyone (or everyone) can be and will be executing it on their behalf. In this case, deployer of the receiver contract should have a `tx.origin` check to see if the `flashLoan()` transaction is initialized by a authorized wallet. Also, reverting the flashLoan calls with exceptionaly high service fees might be a good idea.
