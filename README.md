@@ -3,7 +3,7 @@ After completing each challenge, I will document my findings, takeaways and my m
 
 Solutions can be found in `./test` directory under the relevant challenge directory.
 
-[Can Dost Yavuz](https://twitter.com/0xDost)
+🥷🏻 [Can Dost Yavuz](https://twitter.com/0xDost)
 
 # 1- Unstoppable:
 **Issue:** This is a classic DOS attack pattern that is caused by relying on two irrelevant parameters being equal.
@@ -28,3 +28,12 @@ In that case DVT balance can be increased without calling the `depositTokens()`,
 **My Exploit Pattern:** I have written the attacker contract which sets allowence for itself from the pool contract by sending relevant calldata. Also, another function enables attacker to make a `transferFrom()` call to withdraw stolen funds.
 
 **Takeaway:** Making calls to external contracts are dangerous. Trust no one. Limit your contracts with certain call types to only certain (trusted) addresses.
+
+
+# 4- Side Entrance:
+**Issue:** Problem here is assets acquired with `flashLoan()` can be deposited into the same contract with `deposit()` , so attacker can get free ownership of assets.
+
+**My Exploit Pattern:** My attacker contract includes implementation of `execute()` function and it is triggered when it's called by `flashLoan()` when it's called from the attacker contract. Since all `msg.value` is sent to the `execute()` , I make the `deposit()` call to vulnerable contract. Since all balance is sent to the contract, flash loan will not revert. But as the depositor, we get the whole ownership of the loaned assets. In another function, I make the `withdraw()` call to acquire the assets.
+*Note: I initially forgot to include `receive()` function into attacker contract, so it failed to withdraw assets!*  
+
+**Takeaway:** Contract shouldn't allow `deposit()` calls made inside the `flashLoan()` calls. Generally speaking, it's good idea to limit external calls inside flash loan related functions as much as possible. *In some posts I've seen that this challenge can also be categorized as reentrancy attack, but I disagree with that. We are executing the functions only once, pass all the require checks and we don't use fallback methods to trigger consecutive calls.*  

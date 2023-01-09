@@ -26,6 +26,8 @@ contract SideEntranceLenderPool {
         payable(msg.sender).sendValue(amountToWithdraw);
     }
 
+    // @audit interface is called with msg.sender, which can be a malicious contract
+    // @audit flashLoan 1000 ETH, execute deposit (contract balance is still 1000 eth), then withdraw.
     function flashLoan(uint256 amount) external {
         uint256 balanceBefore = address(this).balance;
         require(balanceBefore >= amount, "Not enough ETH in balance");
