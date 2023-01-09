@@ -32,7 +32,7 @@ In that case DVT balance can be increased without calling the `depositTokens()`,
 **Takeaway:** Making calls to external contracts are dangerous. Trust no one. Limit your contracts with certain call types to only certain (trusted) addresses.
 
 
-# 4- Side Entrance:
+# 4- Side Entrance:
 **Issue:** Problem here is assets acquired with `flashLoan()` can be deposited into the same contract with `deposit()` , so attacker can get free ownership of assets.
 
 **My Exploit Pattern:** My attacker contract includes implementation of `execute()` function and it is triggered when it's called by `flashLoan()` when it's called from the attacker contract. Since all `msg.value` is sent to the `execute()` , I make the `deposit()` call to vulnerable contract. Since all balance is sent to the contract, flash loan will not revert. But as the depositor, we get the whole ownership of the loaned assets. In another function, I make the `withdraw()` call to acquire the assets.
