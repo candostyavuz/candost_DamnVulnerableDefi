@@ -2,7 +2,8 @@
 After completing each challenge, I will document my findings, takeaways and my mental model to exploit the target asset.
 
 Solutions can be found in `./test` directory under the relevant challenge directory.
-Attacker can be found in `./contracts` directory under the relevant challenge directory.
+
+Attacker contracts can be found in `./contracts` directory under the relevant challenge directory.
 
 🥷🏻 [Can Dost Yavuz](https://twitter.com/0xDost)
 
