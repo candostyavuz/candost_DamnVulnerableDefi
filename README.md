@@ -6,6 +6,7 @@ Solutions can be found in `./test` directory under the relevant challenge direct
 Attacker contracts can be found in `./contracts` directory under the relevant challenge directory.
 
 🥷🏻 [Can Dost Yavuz](https://twitter.com/0xDost)
+---
 
 # 1- Unstoppable:
 **Issue:** This is a classic DOS attack pattern that is caused by relying on two irrelevant parameters being equal.
@@ -17,12 +18,14 @@ Attacker contracts can be found in `./contracts` directory under the relevant ch
 In that case DVT balance can be increased without calling the `depositTokens()`, causes mismatch between `poolBalance` and the actual balance.
 *In the case of ETH, generally it's good to avoid relying on `address(this).balance` since it can always be manipulated by `self.destruct()`.*
 
+
 # 2- Naive Receiver:
 **Issue:** Lack of access control in FlashLoanReceiver contract makes it possible anyone to use this contract's address as the borrower in lender pool, hence forcing it to pay service fees.
 
 **My Exploit Pattern:** An exploit can be easily carried out by using the Receiver contract's address as the borrower in the lender pool and executing a flash loan until the balance is drained due to the service fees. A naive approach is to send the flash loan transaction 10 times. A more professional approach involves deploying an Attack.sol contract, which executes the flash loan in a single transaction until the balance is completely drained.
 
 **Takeaway:** For external / public functions, one should always remember that anyone (or everyone) can be and will be executing it on their behalf. In this case, deployer of the receiver contract should have a `tx.origin` check to see if the `flashLoan()` transaction is initialized by a authorized wallet. Also, reverting the flashLoan calls with exceptionaly high service fees might be a good idea.
+
 
 # 3- Truster:
 **Issue:** `TrusterLenderPool` enables making a low level call to any given `target` address with any given calldata. Since it is not a `delegatecall()` the `msg.sender` value will always be the pool contract. By using `flashLoand()` function, an attacker contract can make a low-level call to DVT ERC-20 token contract and set infinite number of allowence for itself.
@@ -43,12 +46,14 @@ In that case DVT balance can be increased without calling the `depositTokens()`,
 
 # 5- The Rewarder:
 **Issue:** 
-`Them city-folk engineers done went and made a right mess,
+```
+Them city-folk engineers done went and made a right mess,
 A vulnerability in the biz logic, nonetheless.
 A contract that didn't keep tokens timely staked,
 Allowing users to quickly get rich and make.
 But now it's fixed, and all's back to right,
-In the wild west of business, everything's tight.``
+In the wild west of business, everything's tight.
+```
 
 **My Exploit Pattern:**
 An attacker contract which first takes the flashloan and then triggers the `deposit()` function is enough to get most of the `accTokens` .
