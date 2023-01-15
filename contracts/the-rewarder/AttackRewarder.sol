@@ -31,7 +31,6 @@ contract AttackRewarder {
     function LoanTrigger() public {
         require(damnValuableToken.balanceOf(address(flashLoanContract)) > 0, "contract is empty");
         flashLoanContract.flashLoan(drainerNumber);
-
     }
 
     // Do the magic here

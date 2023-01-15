@@ -59,3 +59,19 @@ In the wild west of business, everything's tight.
 An attacker contract which first takes the flashloan and then triggers the `deposit()` function is enough to get most of the `accTokens` .
 
 **Takeaway:** If a pool is doing operations based on stakes of users, then `timestamp` of each deposit operation should be recorded for the staked tokens. Otherwise, protocol would not be fair since attackers can exploit the rewards with flashloans.
+
+
+# 6- Selfie:
+**Issue:** This contract has a very obvious attack pattern for a level-6 challenge. Of course, the biggest vulnerability is having the `drainAllFunds` function in the pool :) . But the main vulnerability is that the governance contract doesn't check the balance deposited into contract for an account to have voting power for a proposal. Instead, it checks the snapshot of the funds which can be easily done by first obtaining the tokens via `flashLoan` and triggering `snapshot` afterwards.
+
+**My Exploit Pattern:** 
+1. Trigger flash loan, get all the balance from pool and in the fallback function:
+    - Activate `snapshot``
+    - Repay the loan
+2. Put new proposal into queue with call data of `drainAllFunds(address)` and address of the attacker contract
+3. Retrive and store `actionId` as a future reference for execution
+4. Wait for two days at least
+5. Trigger execute with stored ID.
+6. Withdraw stolen funds to attacker's wallet
+
+**Takeaway:** Putting `ACTION_DELAY_IN_SECONDS` is a good idea to prevent actions paid with flashloans but using snapshot information for determining the voting power kills the whole idea. Instead, forcing users to stake funds (at least some period of time) or checking active balance might have prevented the issue.
