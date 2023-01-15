@@ -62,11 +62,12 @@ An attacker contract which first takes the flashloan and then triggers the `depo
 
 
 # 6- Selfie:
-**Issue:** This contract has a very obvious attack pattern for a level-6 challenge. Of course, the biggest vulnerability is having the `drainAllFunds` function in the pool :) . But the main vulnerability is that the governance contract doesn't check the balance deposited into contract for an account to have voting power for a proposal. Instead, it checks the snapshot of the funds which can be easily done by first obtaining the tokens via `flashLoan` and triggering `snapshot` afterwards.
+**Issue:** This contract has a very obvious attack pattern for a level-6 challenge. Of course, the biggest vulnerability is having the `drainAllFunds` function in the pool :) . But the main vulnerability is that the governance contract doesn't check the balance deposited into contract for an account to have voting power for a proposal. Instead, it checks the snapshot of the funds which can be easily bypassed by first obtaining the tokens via `flashLoan` and triggering `snapshot` afterwards.
 
 **My Exploit Pattern:** 
-1. Trigger flash loan, get all the balance from pool and in the fallback function:
-    - Activate `snapshot``
+1. Trigger the `flashLoan`, get all the balance from pool.
+   In the fallback function:
+    - Activate `snapshot`
     - Repay the loan
 2. Put new proposal into queue with call data of `drainAllFunds(address)` and address of the attacker contract
 3. Retrive and store `actionId` as a future reference for execution
