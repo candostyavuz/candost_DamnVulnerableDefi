@@ -39,3 +39,18 @@ In that case DVT balance can be increased without calling the `depositTokens()`,
 *Note: I initially forgot to include `receive()` function into attacker contract, so it failed to withdraw assets!*  
 
 **Takeaway:** Contract shouldn't allow `deposit()` calls made inside the `flashLoan()` calls. Generally speaking, it's good idea to limit external calls inside flash loan related functions as much as possible. *In some posts I've seen that this challenge can also be categorized as reentrancy attack, but I disagree with that. We are executing the functions only once, pass all the require checks and we don't use fallback methods to trigger consecutive calls.*  
+
+
+# 5- The Rewarder:
+**Issue:** 
+`Them city-folk engineers done went and made a right mess,
+A vulnerability in the biz logic, nonetheless.
+A contract that didn't keep tokens timely staked,
+Allowing users to quickly get rich and make.
+But now it's fixed, and all's back to right,
+In the wild west of business, everything's tight.``
+
+**My Exploit Pattern:**
+An attacker contract which first takes the flashloan and then triggers the `deposit()` function is enough to get most of the `accTokens` .
+
+**Takeaway:** If a pool is doing operations based on stakes of users, then `timestamp` of each deposit operation should be recorded for the staked tokens. Otherwise, protocol would not be fair since attackers can exploit the rewards with flashloans.
