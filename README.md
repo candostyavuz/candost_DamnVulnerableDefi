@@ -75,4 +75,4 @@ An attacker contract which first takes the flashloan and then triggers the `depo
 5. Trigger execute with stored ID.
 6. Withdraw stolen funds to attacker's wallet
 
-**Takeaway:** Putting `ACTION_DELAY_IN_SECONDS` is a good idea to prevent actions paid with flashloans but using snapshot information for determining the voting power kills the whole idea. Instead, forcing users to stake funds (at least some period of time) or checking active balance might have prevented the issue.
+**Takeaway:** Putting `ACTION_DELAY_IN_SECONDS` is a good idea to prevent actions paid with flashloans but using snapshot information for determining the voting power kills the whole idea. Instead, forcing users to stake funds (at least some period of time) might have prevented the issue.
