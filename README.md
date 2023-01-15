@@ -5,7 +5,7 @@ Solutions can be found in `./test` directory under the relevant challenge direct
 
 Attacker contracts can be found in `./contracts` directory under the relevant challenge directory.
 
-🥷🏻 [Can Dost Yavuz](https://twitter.com/0xDost)
+🥷🏻 [Can Dost Yavuz](https://www.linkedin.com/in/candosty/)
 ---
 
 # 1- Unstoppable:
