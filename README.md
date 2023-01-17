@@ -76,3 +76,21 @@ An attacker contract which first takes the flashloan and then triggers the `depo
 6. Withdraw stolen funds to attacker's wallet
 
 **Takeaway:** Putting `ACTION_DELAY_IN_SECONDS` is a good idea to prevent actions paid with flashloans but using snapshot information for determining the voting power kills the whole idea. Instead, forcing users to stake funds (at least some period of time) might have prevented the issue.
+
+
+# 7- Compromised:
+**Issue:** Oracle Price Manipulation
+
+**My Exploit Pattern:** After spending 45 minutes examining all contracts, I've concluded that contracts seem fine and there's no significant exploit pattern. Then, I focused on leaked data from the server. Notice that hex values represent ASCII characters. So converting it to string gives a value of: `MHhjNjc4ZWYxYWE0NTZkYTY1YzZmYzU4NjFkNDQ4OTJjZGZhYzBjNmM4YzI1NjBiZjBjOWZiY2RhZTJmNDczNWE5`. After another thought process, this seemed like a base64 encoded data. By encoding it, we get a 32-bytes long hex character which can be only one thing in our case: an Ethereum private key!
+
+By using private keys of trusted oracles, we can set the NFT prices for the exchange. And here's the steps of my first 'Oracle Price Manipulation' exploit:
+
+1. Set NFT prices to 0 by using oracle accounts
+2. Attacker buys nft with lowest wei price possible (1 wei)
+3. Set nft oracle price to 9990 ETH
+4. Approve & sell nft to contract
+5. Set nft price to initial price
+
+Still, this exploit wouldn't be possible if there was only one oracle key leaked.
+
+**Takeaway:** Never leak private keys. Period.
