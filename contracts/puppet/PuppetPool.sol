@@ -46,6 +46,9 @@ contract PuppetPool is ReentrancyGuard {
         return amount * _computeOraclePrice() * 2 / 10 ** 18;
     }
 
+    // @audit Proposed lending pool functionality is different from actual functionality.
+    // @audit Lending pool is not price agnostic. That means if ETH amount is zero in uniswapPair,
+    // @audit the collateral required will be zero.
     function _computeOraclePrice() private view returns (uint256) {
         // calculates the price of the token in wei according to Uniswap pair
         return uniswapPair.balance * (10 ** 18) / token.balanceOf(uniswapPair);

