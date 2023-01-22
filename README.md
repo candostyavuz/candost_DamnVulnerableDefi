@@ -103,4 +103,12 @@ This is a bad idea because price of ETH can easily be manipulated by changing th
 **My Exploit Pattern:** Prior to the swap, the collateral deposit required is 200K $ETH. To lower this amount, the `_computeOraclePrice()` function, which calculates the ratio between the ETH balance and DVT token balance on the Uniswap Pair, needs to be altered.
 By swapping 1000 $DVT for $ETH on the automated market maker (AMM) exchange, the required ETH collateral for borrowing all $DVT tokens is reduced to 19,6643. With an initial balance of 25 $ETH, the attacker has sufficient collateral to drain the pool.
 
-**Takeaway:** Using the AMM price in an on-chain pool poses a high level of risk and requires a different approach. In addition to the lack of liquidity, if the pool has higher liquidity, it could be vulnerable to a flash loan attack, resulting in similar negative outcomes.
+**Takeaway:** Using the AMM price in an on-chain pool poses a high level of risk especially in the low liquidity pools where big price fluctuations & slippage occurs. In addition to the lack of liquidity, if the pool has higher liquidity, it could be vulnerable to a flash loan attack, resulting in similar negative outcomes.
+
+
+# 9- Puppet V2:
+**Issue:** Similar to puppet v1, this lending pool contract is depending on AMM prices for determining the required collateral. The difference is, now the token pair is launched on Uniswap V2 which uses wETH instead of plain ETH.
+
+**My Exploit Pattern:** After swapping all DVT tokens of attacker on AMM, we end up with 9.90 wETH while wETH collateral decreased from 300K wETH to **29,496 wETH**. Notice that attacker still has no enough wETH to cover the collateral. It's where attacker's ETH balance comes into play. By calling `deposit()` function from wETH contract, we can swap our remaining 19.9 ETH balance into wETH, which results in  29.7 wETH balance. Now attacker *barely* has the enough collateral and it can drain all DVT tokens from the lending pool.
+
+**Takeaway:** Low liquidity pools have serious price swings especially on large trades. Uniswap V3 tries to reduce that suddent price movements with 'price range' concept but still it's good idea to always remember that price manipulation via liquidity imbalance is a part of the AMM logic.
